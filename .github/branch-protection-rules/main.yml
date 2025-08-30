@@ -1,0 +1,20 @@
+# Protección de Rama Main
+# Este archivo configura automáticamente la protección de la rama main
+
+branch_protection_rules:
+  - pattern: 'main'
+    required_status_checks:
+      strict: true
+      contexts: []
+    enforce_admins: false
+    required_pull_request_reviews:
+      required_approving_review_count: 1
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: false
+      require_last_push_approval: false
+    restrictions: null
+    required_linear_history: false
+    allow_force_pushes: false
+    allow_deletions: false
+    block_creations: false
+    required_conversation_resolution: false

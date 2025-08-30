@@ -1,0 +1,108 @@
+name: CI/CD Pipeline Completo
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    name: Build y Test
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Verificar linting
+      run: npm run lint
+
+    - name: Ejecutar tests
+      run: npm test
+
+    - name: Build de aplicación
+      run: npm run build
+
+    - name: Build de Storybook
+      run: npm run build-storybook
+
+    - name: Subir artifacts de build
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: dist/
+        retention-days: 30
+
+    - name: Subir artifacts de Storybook
+      uses: actions/upload-artifact@v4
+      with:
+        name: storybook-artifacts
+        path: storybook-static/
+        retention-days: 30
+
+  quality-analysis:
+    runs-on: ubuntu-latest
+    name: Análisis de Calidad
+    needs: build-and-test
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Análisis de seguridad
+      run: npm audit --audit-level=moderate
+
+    - name: Verificar vulnerabilidades
+      run: npm audit fix --dry-run
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy a Producción
+    needs: [build-and-test, quality-analysis]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v4
+
+    - name: Configurar Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Instalar dependencias
+      run: npm ci
+
+    - name: Build de producción
+      run: npm run build
+
+    - name: Deploy a GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        publish_branch: gh-pages
+
+# Workflow configurado automáticamente por Cursor AI
+# Proyecto: OposIA v2.0 - IArteQ Desarrollos
+# Fecha: 2025
