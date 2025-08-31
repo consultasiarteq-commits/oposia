@@ -25,6 +25,7 @@
     "tailwind-merge": "^1.14.0"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.28.3",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
